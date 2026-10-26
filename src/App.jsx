@@ -1,8 +1,15 @@
+import { useState } from 'react'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Card from './components/Card'
+import CurrencySelect from './components/CurrencySelect'
+import { Loading, ErrorMessage } from './components/Feedback'
+import { useCurrencies } from './hooks/useCurrencies'
 
 function App() {
+  const { currencies, loading, error } = useCurrencies()
+  const [from, setFrom] = useState('USD')
+
   return (
     <div className="app">
       <Header
@@ -11,7 +18,17 @@ function App() {
       />
       <main className="content">
         <Card title="Conversor">
-          <p className="muted">Em breve: formulário de conversão.</p>
+          {loading && <Loading text="Carregando moedas..." />}
+          {error && <ErrorMessage message={error} />}
+          {!loading && !error && (
+            <CurrencySelect
+              id="from"
+              label="Moeda de origem"
+              value={from}
+              onChange={setFrom}
+              currencies={currencies}
+            />
+          )}
         </Card>
       </main>
       <Footer />
