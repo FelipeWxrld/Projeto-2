@@ -128,6 +128,55 @@ button:focus-visible {
   outline-offset: 1px;
 }
 
+.conversion-form {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr auto 1.4fr;
+  gap: 12px;
+  align-items: end;
+}
+
+.swap {
+  padding: 10px 14px;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.result {
+  margin-top: 20px;
+  padding: 16px 18px;
+  background: var(--accent-soft);
+  border-radius: 12px;
+}
+
+.result p {
+  margin: 0;
+}
+
+.result-from {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.result-to {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 2px 0 6px !important;
+}
+
+.result-meta {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 700px) {
+  .conversion-form {
+    grid-template-columns: 1fr;
+  }
+  .swap {
+    justify-self: center;
+  }
+}
+
 /* ---------- Botões ---------- */
 .btn {
   font: inherit;
