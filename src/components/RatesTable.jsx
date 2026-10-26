@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import Card from './Card'
+import ExportButton from './ExportButton'
 import { Loading, ErrorMessage } from './Feedback'
 import { useLatestRates } from '../hooks/useLatestRates'
 import { buildRows, filterRows, sortRows } from '../utils/table'
@@ -32,18 +33,35 @@ function RatesTable({ base, amount, currencies, selected, onSelect }) {
   const numericAmount = Number(amount)
   const hasAmount = amount !== '' && !Number.isNaN(numericAmount)
 
+  const csvColumns = [
+    { header: 'Moeda base', value: () => base },
+    { header: 'Moeda', value: (r) => r.code },
+    { header: 'Nome', value: (r) => r.name },
+    { header: 'Taxa', value: (r) => r.rate },
+    { header: `Valor convertido (${hasAmount ? numericAmount : 0} ${base})`, value: (r) => (hasAmount ? numericAmount * r.rate : '') },
+    { header: 'Data da cotação', value: () => date ?? '' },
+  ]
+
   return (
     <Card
       title={`Cotações de ${base}`}
       actions={
-        <input
-          type="search"
-          className="search"
-          placeholder="Filtrar moeda..."
-          aria-label="Filtrar moedas"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <>
+          <input
+            type="search"
+            className="search"
+            placeholder="Filtrar moeda..."
+            aria-label="Filtrar moedas"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {/* exporta exatamente o que está na tela (já filtrado e ordenado) */}
+          <ExportButton
+            rows={rows}
+            columns={csvColumns}
+            filename={`cotacoes-${base}-${date ?? 'atual'}.csv`}
+          />
+        </>
       }
     >
       {loading && <Loading text="Carregando cotações..." />}
