@@ -18,8 +18,8 @@ Projeto individual e incremental, desenvolvido aplicando os conteúdos das aulas
 Requisitos: Node.js 20+ e npm.
 
 ```bash
-git clone <URL-DO-SEU-REPOSITORIO>
-cd currency-exchange-app
+git clone <(https://github.com/FelipeWxrld/Projeto-2.git)>
+cd Projeto-2
 npm install
 npm run dev      # http://localhost:5173
 ```
