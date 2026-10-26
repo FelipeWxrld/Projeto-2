@@ -5,6 +5,7 @@ import Card from './components/Card'
 import ConversionForm from './components/ConversionForm'
 import ConversionResult from './components/ConversionResult'
 import HistoryChart from './components/HistoryChart'
+import RatesTable from './components/RatesTable'
 import { Loading, ErrorMessage } from './components/Feedback'
 import { useCurrencies } from './hooks/useCurrencies'
 import { useConversion } from './hooks/useConversion'
@@ -60,6 +61,16 @@ function App() {
         </Card>
 
         {!loading && !error && <HistoryChart from={from} to={to} />}
+
+        {!loading && !error && (
+          <RatesTable
+            base={from}
+            amount={amount}
+            currencies={currencies}
+            selected={to}
+            onSelect={setTo}
+          />
+        )}
       </main>
       <Footer />
     </div>
