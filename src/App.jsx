@@ -4,6 +4,7 @@ import Footer from './components/Footer'
 import Card from './components/Card'
 import ConversionForm from './components/ConversionForm'
 import ConversionResult from './components/ConversionResult'
+import HistoryChart from './components/HistoryChart'
 import { Loading, ErrorMessage } from './components/Feedback'
 import { useCurrencies } from './hooks/useCurrencies'
 import { useConversion } from './hooks/useConversion'
@@ -57,6 +58,8 @@ function App() {
             </>
           )}
         </Card>
+
+        {!loading && !error && <HistoryChart from={from} to={to} />}
       </main>
       <Footer />
     </div>
