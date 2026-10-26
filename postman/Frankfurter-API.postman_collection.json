@@ -1,0 +1,209 @@
+{
+  "info": {
+    "name": "Currency Exchange App - Frankfurter API",
+    "description": "Requisições usadas pelo Currency Exchange App. API pública, sem autenticação. Documentação: https://frankfurter.dev",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://api.frankfurter.dev/v1" },
+    { "key": "base", "value": "USD" },
+    { "key": "target", "value": "BRL" },
+    { "key": "date", "value": "2026-01-02" },
+    { "key": "start", "value": "2026-09-26" },
+    { "key": "end", "value": "2026-10-26" }
+  ],
+  "item": [
+    {
+      "name": "Listar moedas",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Retorna objeto código -> nome', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body).to.be.an('object');",
+              "  pm.expect(body).to.have.property('USD');",
+              "  pm.expect(body).to.have.property('BRL');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/currencies",
+          "host": ["{{baseUrl}}"],
+          "path": ["currencies"]
+        },
+        "description": "Usado pelo hook useCurrencies para popular os selects."
+      }
+    },
+    {
+      "name": "Taxa atual entre duas moedas (conversor)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Contém base, date e rates', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.base).to.eql(pm.variables.get('base'));",
+              "  pm.expect(body).to.have.property('date');",
+              "  pm.expect(body.rates).to.have.property(pm.variables.get('target'));",
+              "  pm.expect(body.rates[pm.variables.get('target')]).to.be.a('number');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/latest?base={{base}}&symbols={{target}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["latest"],
+          "query": [
+            { "key": "base", "value": "{{base}}" },
+            { "key": "symbols", "value": "{{target}}" }
+          ]
+        },
+        "description": "Usado pelo hook useConversion. O valor convertido é calculado no front: amount * rate."
+      }
+    },
+    {
+      "name": "Todas as taxas de uma moeda base (tabela)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Retorna várias moedas e não inclui a própria base', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(Object.keys(body.rates).length).to.be.above(10);",
+              "  pm.expect(body.rates).to.not.have.property(pm.variables.get('base'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/latest?base={{base}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["latest"],
+          "query": [{ "key": "base", "value": "{{base}}" }]
+        },
+        "description": "Usado pelo hook useLatestRates (tabela de cotações com filtro/ordenação/CSV)."
+      }
+    },
+    {
+      "name": "Taxa em uma data específica",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Data retornada é a pedida ou o dia útil anterior', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.date <= pm.variables.get('date')).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/{{date}}?base={{base}}&symbols={{target}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["{{date}}"],
+          "query": [
+            { "key": "base", "value": "{{base}}" },
+            { "key": "symbols", "value": "{{target}}" }
+          ]
+        },
+        "description": "Em fins de semana/feriados a API devolve o último dia útil disponível."
+      }
+    },
+    {
+      "name": "Série temporal (gráfico de histórico)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('rates é um objeto indexado por data', () => {",
+              "  const body = pm.response.json();",
+              "  const dates = Object.keys(body.rates);",
+              "  pm.expect(dates.length).to.be.above(1);",
+              "  pm.expect(dates[0]).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+              "  pm.expect(body.rates[dates[0]]).to.have.property(pm.variables.get('target'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/{{start}}..{{end}}?base={{base}}&symbols={{target}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["{{start}}..{{end}}"],
+          "query": [
+            { "key": "base", "value": "{{base}}" },
+            { "key": "symbols", "value": "{{target}}" }
+          ]
+        },
+        "description": "Usado pelo hook useTimeSeries. Períodos longos podem vir agrupados por semana/mês pela API."
+      }
+    },
+    {
+      "name": "Erro: moeda inválida (cenário negativo)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('API recusa moeda inexistente (4xx)', () => {",
+              "  pm.expect(pm.response.code).to.be.within(400, 499);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/latest?base=XXX&symbols=BRL",
+          "host": ["{{baseUrl}}"],
+          "path": ["latest"],
+          "query": [
+            { "key": "base", "value": "XXX" },
+            { "key": "symbols", "value": "BRL" }
+          ]
+        },
+        "description": "Mostra o formato de erro tratado pelo front (ErrorMessage)."
+      }
+    }
+  ]
+}
